@@ -51,49 +51,4 @@ describe("auth router", () => {
         .expect("Content-Type", /json/);
     });
   });
-
-  describe("GET /api/auth/users", () => {
-    it("should return 401 if no token is sent in header", () => {
-      return request(server)
-        .get("/api/auth/users")
-        .expect(401)
-        .expect("Content-type", /json/);
-    });
-
-    it("should return 200 if user is logged in/token is sent in the header", async () => {
-      const user = { username: "user", password: "password" };
-      await request(server)
-        .post("/api/auth/register")
-        .send({ username: "user", password: "password" });
-
-      await request(server)
-        .post("/api/auth/login")
-        .send({ username: "user", password: "password" })
-        .expect(200)
-        .expect("Content-Type", /json/);
-
-      const token = generateToken(user);
-
-      return request(server)
-        .get("/api/auth/users")
-        .set("Authorization", token)
-        .expect(200)
-        .expect("Content-type", /json/);
-    });
-  });
 });
-
-function generateToken(user) {
-  const payload = {
-    subject: user.id, // sub in payload is what the token is about
-    username: user.username
-    // ...otherData
-  };
-
-  const options = {
-    expiresIn: "1d" // show other available options in the library's documentation
-  };
-
-  // extract the secret away so it can be required and used where needed
-  return jwt.sign(payload, secrets.jwtSecret, options); // this method is synchronous
-}
